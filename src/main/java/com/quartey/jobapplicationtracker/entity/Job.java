@@ -22,7 +22,7 @@ public class Job {
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
-    private User userId;
+    private User user;
 
     @Column(name = "company_name", nullable = false)
     @Size(max = 255)
