@@ -3,6 +3,7 @@ package com.quartey.jobapplicationtracker.service;
 import com.quartey.jobapplicationtracker.entity.User;
 import com.quartey.jobapplicationtracker.repository.UserRepository;
 import jakarta.transaction.Transactional;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -11,9 +12,11 @@ import java.util.Optional;
 @Transactional // Tell Spring db operations running transactions
 public class UserService {
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public User registerUser(User user) {
@@ -25,7 +28,9 @@ public class UserService {
             throw new RuntimeException("Email already exists");
         }
 
-        //Add password hash here
+        //Password hash
+        String hashedPassword = passwordEncoder.encode(user.getPasswordHash());
+        user.setPasswordHash(hashedPassword);
 
         return userRepository.save(user);
     }
