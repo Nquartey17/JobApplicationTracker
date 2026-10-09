@@ -1,5 +1,7 @@
 package com.quartey.jobapplicationtracker.service;
 
+import com.quartey.jobapplicationtracker.dto.RegisterRequest;
+import com.quartey.jobapplicationtracker.dto.UserResponse;
 import com.quartey.jobapplicationtracker.entity.User;
 import com.quartey.jobapplicationtracker.repository.UserRepository;
 import jakarta.transaction.Transactional;
@@ -19,20 +21,28 @@ public class UserService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public User registerUser(User user) {
-        if (userRepository.existsByUsername(user.getUsername())) {
+    public UserResponse registerUser(RegisterRequest request) {
+
+        if (userRepository.existsByUsername(request.username())) {
+            //Change to DuplicateResourceException later
             throw new RuntimeException("Username already exists");
         }
 
-        if (userRepository.existsByEmail(user.getEmail())) {
+        if (userRepository.existsByEmail(request.email())) {
             throw new RuntimeException("Email already exists");
         }
 
+        User user = new User();
+        user.setUsername(request.username());
+        user.setEmail(request.email());
         //Password hash
-        String hashedPassword = passwordEncoder.encode(user.getPasswordHash());
-        user.setPasswordHash(hashedPassword);
+        user.setPasswordHash(
+                passwordEncoder.encode(request.password())
+        );
 
-        return userRepository.save(user);
+        User savedUser = userRepository.save(user);
+
+        return new UserResponse(savedUser.getId(), savedUser.getUsername(), savedUser.getEmail());
     }
 
     public Optional<User> getUserByUsername(String name) {
