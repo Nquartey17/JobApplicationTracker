@@ -3,6 +3,7 @@ package com.quartey.jobapplicationtracker.service;
 import com.quartey.jobapplicationtracker.dto.RegisterRequest;
 import com.quartey.jobapplicationtracker.dto.UserResponse;
 import com.quartey.jobapplicationtracker.entity.User;
+import com.quartey.jobapplicationtracker.exception.DuplicateResourceException;
 import com.quartey.jobapplicationtracker.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -24,12 +25,11 @@ public class UserService {
     public UserResponse registerUser(RegisterRequest request) {
 
         if (userRepository.existsByUsername(request.username())) {
-            //Change to DuplicateResourceException later
-            throw new RuntimeException("Username already exists");
+            throw new DuplicateResourceException("Username already exists");
         }
 
         if (userRepository.existsByEmail(request.email())) {
-            throw new RuntimeException("Email already exists");
+            throw new DuplicateResourceException("Email already exists");
         }
 
         User user = new User();
