@@ -1,10 +1,10 @@
 package com.quartey.jobapplicationtracker.service;
 
+import com.quartey.jobapplicationtracker.dto.LoginRequest;
 import com.quartey.jobapplicationtracker.dto.RegisterRequest;
 import com.quartey.jobapplicationtracker.dto.UserResponse;
 import com.quartey.jobapplicationtracker.entity.User;
 import com.quartey.jobapplicationtracker.repository.UserRepository;
-import jakarta.validation.Valid;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -39,5 +39,17 @@ public class AuthService {
         return new UserResponse(savedUser.getId(),
                 savedUser.getUsername(),
                 savedUser.getEmail());
+    }
+
+    public UserResponse login(LoginRequest loginRequest) {
+        User user = userRepository.findByUsername(loginRequest.username())
+                .orElseThrow(() ->
+                        new IllegalArgumentException("Invalid username or password"));
+
+        if (!passwordEncoder.matches(loginRequest.password(),user.getPasswordHash())) {
+            throw new IllegalArgumentException("Invalid username or password");
+        }
+
+        return new UserResponse(user.getId(), user.getUsername(), user.getEmail());
     }
 }
