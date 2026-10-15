@@ -1,5 +1,6 @@
 package com.quartey.jobapplicationtracker.controller;
 
+import com.quartey.jobapplicationtracker.dto.AuthResponse;
 import com.quartey.jobapplicationtracker.dto.LoginRequest;
 import com.quartey.jobapplicationtracker.dto.RegisterRequest;
 import com.quartey.jobapplicationtracker.dto.UserResponse;
@@ -32,8 +33,8 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<UserResponse> login(@Valid @RequestBody LoginRequest loginRequest) {
-        UserResponse response = authService.login(loginRequest);
+    public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest loginRequest) {
+        AuthResponse response = authService.login(loginRequest);
 
         return ResponseEntity.ok(response);
     }
