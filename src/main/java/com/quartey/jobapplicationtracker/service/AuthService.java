@@ -1,5 +1,6 @@
 package com.quartey.jobapplicationtracker.service;
 
+import com.quartey.jobapplicationtracker.dto.AuthResponse;
 import com.quartey.jobapplicationtracker.dto.LoginRequest;
 import com.quartey.jobapplicationtracker.dto.RegisterRequest;
 import com.quartey.jobapplicationtracker.dto.UserResponse;
@@ -13,10 +14,12 @@ public class AuthService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
 
-    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtService jwtService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.jwtService = jwtService;
     }
 
     public UserResponse register(RegisterRequest request) {
@@ -41,15 +44,19 @@ public class AuthService {
                 savedUser.getEmail());
     }
 
-    public UserResponse login(LoginRequest loginRequest) {
+    public AuthResponse login(LoginRequest loginRequest) {
         User user = userRepository.findByUsername(loginRequest.username())
                 .orElseThrow(() ->
                         new IllegalArgumentException("Invalid username or password"));
 
-        if (!passwordEncoder.matches(loginRequest.password(),user.getPasswordHash())) {
+        if (!passwordEncoder.matches(
+                loginRequest.password(),
+                user.getPasswordHash())) {
             throw new IllegalArgumentException("Invalid username or password");
         }
 
-        return new UserResponse(user.getId(), user.getUsername(), user.getEmail());
+        String token = jwtService.generateToken(user.getId(), user.getUsername());
+
+        return new AuthResponse(token, "Bearer");
     }
 }
