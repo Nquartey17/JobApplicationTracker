@@ -11,6 +11,8 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 public class JobService {
 
@@ -57,5 +59,33 @@ public class JobService {
                 savedJob.getCreatedAt(),
                 savedJob.getUpdatedAt()
         );
+    }
+
+
+    public List<JobResponse> getJobs(
+            JwtAuthenticationToken authentication) {
+
+        String username = authentication.getToken().getSubject();
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() ->
+                        new IllegalArgumentException("User not found"));
+
+        List<Job> jobs = jobRepository.findByUser_Id(user.getId());
+
+        return jobs.stream()
+                .map(job -> new JobResponse(
+                        job.getId(),
+                        job.getCompanyName(),
+                        job.getJobTitle(),
+                        job.getLocation(),
+                        job.getJobUrl(),
+                        job.getDescription(),
+                        job.getMinSalary(),
+                        job.getMaxSalary(),
+                        job.getCreatedAt(),
+                        job.getUpdatedAt()
+                ))
+                .toList();
     }
 }

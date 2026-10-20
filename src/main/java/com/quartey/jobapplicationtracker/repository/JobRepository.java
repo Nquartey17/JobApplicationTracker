@@ -7,6 +7,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 public interface JobRepository extends JpaRepository<Job, Long> {
+    List<Job> findByUser_Id(Long userId); //Changed to User_Id to properly separate path from user to ID
     List<Job> findByCompanyNameContainingIgnoreCase(String companyName);
     List<Job> findByJobTitleContainingIgnoreCase(String jobTitle);
     List<Job> findByLocationContainingIgnoreCase(String location);
