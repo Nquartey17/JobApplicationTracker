@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface ApplicationRepository extends JpaRepository<Application, Long> {
     List<Application> findByStatusContainingIgnoreCase(String status);
+    List<Application> findByUserId(Long userId);
+    boolean existsByUser_IdAndJob_Id(Long userId, Long jobId); // check if user has already applied to specific job
 }
