@@ -16,6 +16,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
+
 @Service
 public class ApplicationService {
 
@@ -86,10 +88,41 @@ public class ApplicationService {
                 saved.getJob().getCompanyName(),
                 saved.getJob().getJobTitle(),
                 saved.getResume().getId(),
+                saved.getResume().getName(),
                 saved.getStatus(),
                 saved.getAppliedAt(),
                 saved.getLastUpdatedAt(),
                 saved.getNotes()
         );
     }
+
+    @Transactional(readOnly = true)
+    public List<ApplicationResponse> getApplications(JwtAuthenticationToken authentication) {
+
+        String username = authentication.getToken().getSubject();
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() ->
+                        new IllegalArgumentException("User not found"));
+
+        List<Application> applications = applicationRepository.findByUserId(user.getId());
+
+        return applications.stream()
+                .map(application -> new ApplicationResponse(
+                application.getId(),
+                application.getJob().getId(),
+                application.getJob().getCompanyName(),
+                application.getJob().getJobTitle(),
+                application.getResume().getId(),
+                application.getResume().getName(),
+                application.getStatus(),
+                application.getAppliedAt(),
+                application.getLastUpdatedAt(),
+                application.getNotes()
+                ))
+                .toList();
+
+    }
+
+
 }
