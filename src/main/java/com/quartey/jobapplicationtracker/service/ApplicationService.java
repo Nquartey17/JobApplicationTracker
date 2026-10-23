@@ -2,10 +2,8 @@ package com.quartey.jobapplicationtracker.service;
 
 import com.quartey.jobapplicationtracker.dto.ApplicationResponse;
 import com.quartey.jobapplicationtracker.dto.CreateApplicationRequest;
-import com.quartey.jobapplicationtracker.entity.Application;
-import com.quartey.jobapplicationtracker.entity.Job;
-import com.quartey.jobapplicationtracker.entity.Resume;
-import com.quartey.jobapplicationtracker.entity.User;
+import com.quartey.jobapplicationtracker.dto.UpdateApplicationStatusRequest;
+import com.quartey.jobapplicationtracker.entity.*;
 import com.quartey.jobapplicationtracker.repository.ApplicationRepository;
 import com.quartey.jobapplicationtracker.repository.JobRepository;
 import com.quartey.jobapplicationtracker.repository.ResumeRepository;
@@ -77,7 +75,7 @@ public class ApplicationService {
         application.setUser(user);
         application.setJob(job);
         application.setResume(resume);
-        application.setStatus("APPLIED");
+        application.setStatus(ApplicationStatus.APPLIED);
         application.setNotes(request.notes());
 
         Application saved = applicationRepository.save(application);
@@ -89,7 +87,7 @@ public class ApplicationService {
                 saved.getJob().getJobTitle(),
                 saved.getResume().getId(),
                 saved.getResume().getName(),
-                saved.getStatus(),
+                saved.getStatus().name(),
                 saved.getAppliedAt(),
                 saved.getLastUpdatedAt(),
                 saved.getNotes()
@@ -115,13 +113,46 @@ public class ApplicationService {
                 application.getJob().getJobTitle(),
                 application.getResume().getId(),
                 application.getResume().getName(),
-                application.getStatus(),
+                application.getStatus().name(),
                 application.getAppliedAt(),
                 application.getLastUpdatedAt(),
                 application.getNotes()
                 ))
                 .toList();
 
+    }
+
+    @Transactional
+    public ApplicationResponse updateApplicationStatus(Long applicationId,
+                                                       UpdateApplicationStatusRequest request,
+                                                       JwtAuthenticationToken authentication) {
+
+        String username = authentication.getToken().getSubject();
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() ->
+                        new IllegalArgumentException("User not found"));
+
+        Application application = applicationRepository
+                .findById(applicationId)
+                .orElseThrow(() ->
+                        new IllegalArgumentException("Application not found"));
+
+        application.setStatus(request.status());
+        Application saved = applicationRepository.save(application);
+
+        return new ApplicationResponse(
+                saved.getId(),
+                saved.getJob().getId(),
+                saved.getJob().getCompanyName(),
+                saved.getJob().getJobTitle(),
+                saved.getResume().getId(),
+                saved.getResume().getName(),
+                saved.getStatus().name(),
+                saved.getAppliedAt(),
+                saved.getLastUpdatedAt(),
+                saved.getNotes()
+        );
     }
 
 

@@ -1,7 +1,6 @@
 package com.quartey.jobapplicationtracker.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -31,10 +30,9 @@ public class Application {
     @JoinColumn(name = "resume_id", nullable = false)
     private Resume resume;
 
-    // Will change to enum later, String for now
-    @Column(nullable = false)
-    @Size(max = 50)
-    private String status;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 50)
+    private ApplicationStatus status;
 
     @Column(name = "applied_at", nullable = false)
     private LocalDateTime appliedAt;
