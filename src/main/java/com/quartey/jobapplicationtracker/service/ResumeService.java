@@ -109,13 +109,11 @@ public class ResumeService {
 
         String contentType= file.getContentType();
 
-        boolean validContentType =
-                (extension.equals(".pdf")
-                && "application/pdf".equals(contentType))
-                        || (extension.equals(".docx")
-                && "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                        .equals(contentType));
-        return validContentType;
+        return (extension.equals(".pdf")
+        && "application/pdf".equals(contentType))
+                || (extension.equals(".docx")
+        && "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                .equals(contentType));
     }
 
     private static @NonNull String getString(String name, Integer version, MultipartFile file) {
