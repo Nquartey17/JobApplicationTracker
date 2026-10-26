@@ -132,6 +132,10 @@ public class ResumeService {
                     HttpStatus.CONTENT_TOO_LARGE, "Resume file must not exceed 5 MB");
         }
 
+        return getString(version, file);
+    }
+
+    private static @NonNull String getString(Integer version, MultipartFile file) {
         if (version != null && version < 1) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST, "Resume version must be at least 1");
