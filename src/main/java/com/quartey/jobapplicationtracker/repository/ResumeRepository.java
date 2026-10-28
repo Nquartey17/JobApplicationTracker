@@ -9,4 +9,5 @@ public interface ResumeRepository extends JpaRepository<Resume, Long> {
     List<Resume> findByNameContainingIgnoreCase(String name);
     List<Resume> findByFilePath(String filePath);
     List<Resume> findByVersion(Integer version);
+    List<Resume> findByUser_Id(Long id);
 }

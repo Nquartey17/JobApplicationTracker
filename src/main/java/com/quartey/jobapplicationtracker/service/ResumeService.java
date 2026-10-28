@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
@@ -153,5 +154,26 @@ public class ResumeService {
             }
         }
         return extension;
+    }
+
+    public List<ResumeResponse> getResumes(JwtAuthenticationToken authentication) {
+
+        String username = authentication.getToken().getSubject();
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() ->
+                        new IllegalArgumentException("User not found"));
+
+        List<Resume> resumes = resumeRepository.findByUser_Id(user.getId());
+
+        return resumes.stream()
+                .map(resume -> new ResumeResponse(
+                        resume.getId(),
+                        resume.getName(),
+                        resume.getVersion(),
+                        resume.getCreatedAt(),
+                        resume.getUpdatedAt()
+                ))
+                .toList();
     }
 }
