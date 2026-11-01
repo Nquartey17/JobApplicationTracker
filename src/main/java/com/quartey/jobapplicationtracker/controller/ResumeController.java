@@ -3,6 +3,7 @@ package com.quartey.jobapplicationtracker.controller;
 import com.quartey.jobapplicationtracker.dto.ResumeResponse;
 import com.quartey.jobapplicationtracker.service.ResumeService;
 import jakarta.validation.constraints.NotBlank;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
@@ -45,6 +46,12 @@ public class ResumeController {
 
         List<ResumeResponse> resumes = resumeService.getResumes(authentication);
         return ResponseEntity.ok(resumes);
+    }
+
+    @GetMapping("/{id}/file") //Using PathVariable to extract resume ID from the URL
+    public ResponseEntity<Resource> downloadResume(@PathVariable Long id, JwtAuthenticationToken authentication) {
+
+        return resumeService.downloadResume(id, authentication);
     }
 
 }

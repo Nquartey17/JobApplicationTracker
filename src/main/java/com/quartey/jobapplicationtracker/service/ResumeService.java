@@ -1,5 +1,6 @@
 package com.quartey.jobapplicationtracker.service;
 
+import org.springframework.core.io.Resource;
 import com.quartey.jobapplicationtracker.dto.ResumeResponse;
 import com.quartey.jobapplicationtracker.entity.Resume;
 import com.quartey.jobapplicationtracker.entity.User;
@@ -8,10 +9,16 @@ import com.quartey.jobapplicationtracker.repository.UserRepository;
 import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
@@ -176,4 +183,44 @@ public class ResumeService {
                 ))
                 .toList();
     }
+
+    // Using Resource to send the file to Postman/browser
+    public ResponseEntity<Resource> downloadResume(Long id, JwtAuthenticationToken authentication) {
+
+        String username = authentication.getToken().getSubject();
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() ->
+                        new IllegalArgumentException("User not found"));
+
+        Resume resume = resumeRepository.findById(id)
+                .orElseThrow(() ->
+                        new ResponseStatusException(HttpStatus.NOT_FOUND, "Resume not found"));
+
+        try {
+            //Retrieve the actual file
+            Path filePath = Paths.get(resume.getFilePath()).normalize(); //Paths.get -> converts stored file into Java Path
+            // normalize() -> cleans up path. UrlResource -> allows Spring to read file and send it as a resource
+            Resource resource = new UrlResource(filePath.toUri());
+
+            //Check if file is readable before returning
+            if (!resource.exists() || !resource.isReadable()) {
+                throw new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Resume file not found");
+            }
+
+            //return file to user
+            return ResponseEntity.ok()
+                    .contentType(MediaType.APPLICATION_OCTET_STREAM) //Specifies the type of file being returned.
+                    .header(
+                            HttpHeaders.CONTENT_DISPOSITION,
+                            "attachment; filename=\"" + filePath.getFileName() + "\"")
+                    .body(resource) ;
+        } catch (IOException e) {
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Could not download resume");
+        }
+    }
+
 }
