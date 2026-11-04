@@ -54,4 +54,10 @@ public class ResumeController {
         return resumeService.downloadResume(id, authentication);
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteResume(@PathVariable Long id,JwtAuthenticationToken authentication) {
+        resumeService.deleteResume(id, authentication);
+        return ResponseEntity.ok().build();
+    }
+
 }

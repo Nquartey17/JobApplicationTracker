@@ -223,4 +223,38 @@ public class ResumeService {
         }
     }
 
+    public void deleteResume(Long id, JwtAuthenticationToken authentication) {
+
+        String username = authentication.getToken().getSubject();
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() ->
+                        new IllegalArgumentException("User not found"));
+
+        Resume resume = resumeRepository.findById(id)
+                .orElseThrow(() ->
+                        new ResponseStatusException(HttpStatus.NOT_FOUND, "Resume not found"));
+
+        if (!resume.getUser().getId().equals(user.getId())) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "Resume not found");
+        }
+
+        try {
+            // delete the physical file
+            Path filePath = Paths.get(resume.getFilePath()).toAbsolutePath().normalize();
+            if (!filePath.startsWith(storageDirectory)) {
+                throw new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Resume not found");
+            }
+
+            Files.delete(filePath);
+            resumeRepository.delete(resume); // Delete database record
+
+        } catch (IOException e) {
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR, "Could not delete resume file");
+        }
+    }
+
 }
