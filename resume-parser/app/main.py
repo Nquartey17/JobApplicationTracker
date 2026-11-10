@@ -2,6 +2,7 @@ from fastapi import FastAPI, UploadFile, File, HTTPException
 
 from app.parser import extract_text
 from app.skill_extractor import extract_skills
+from app.education_extractor import extract_education
 
 #Create REST API app
 app = FastAPI(
@@ -25,11 +26,13 @@ def parse_resume(file: UploadFile = File(...)):
 
         text = extract_text(file_bytes, file.filename)
         skills = extract_skills(text)
+        education = extract_education(text)
 
         return {
             "filename": file.filename,
             "extracted_text": text,
-            "skills": skills
+            "skills": skills,
+            "education": education
         }
 
     except ValueError as e:
