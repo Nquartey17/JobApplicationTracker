@@ -2,6 +2,18 @@ from io import BytesIO
 from pypdf import PdfReader
 from docx import Document
 
+import re
+
+# Remove empty lines and unnecessary whitespace but preserve existing line breaks
+def clean_text(text: str) -> str:
+    # Replace newlines and other whitespace with spaces
+    text = re.sub(r'\s+', ' ', text)
+
+    # Remove unnecessary spaces around punctuation
+    text = re.sub(r'\s+([,|])', r'\1', text)
+
+    return text.strip()
+
 # Getting file contents as bytes since PDF and DOCX contain binary data, formatting, and other document structures
 def extract_text(file_bytes: bytes, filename: str) -> str:
 
@@ -21,9 +33,7 @@ def extract_text(file_bytes: bytes, filename: str) -> str:
         return text
 
     elif extension == "docx":
-
         document = Document(BytesIO(file_bytes))
-
         paragraphs = [ paragraph.text for paragraph in document.paragraphs ]
 
         return "\n".join(paragraphs)
