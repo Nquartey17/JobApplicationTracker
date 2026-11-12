@@ -46,8 +46,8 @@ def extract_work_experience(text: str) -> dict:
 
     # Find the beginning of the next section
     end_pattern = (
-        r'\b(?:education|skills|technical\s+skills|'
-        r'projects|certifications|awards|publications)\b'
+        r'\b(?:education|academic background|skills|technical skills|'
+        r'projects|certifications|awards|publications|volunteer experience)\b'
     )
 
     remaining_text = normalized_text[start_match.end():]
