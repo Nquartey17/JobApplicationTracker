@@ -2,41 +2,22 @@ import re
 
 # IMPORTANT: starting with a dictionary-based skill extraction since it's beginner-friendly.
 # I can use NLP techniques to identify skills that aren't in dictionary
-# Skills categories will be comp sci related for now, will expand upon later if needed
-SKILL_CATEGORIES = {
-    "programming_languages": [
-        "Java", "Python", "JavaScript", "C++", "PHP", "SQL"
-    ],
+# Skills  will be comp sci related for now, will expand upon later if needed
+SKILLS = [
+    "Java", "Python", "JavaScript", "C++", "PHP", "SQL", "Spring Boot", "React", "Flask", "Node.js", "FastAPI",
+    "PostgreSQL", "MySQL", "MongoDB", "AWS", "Microsoft Azure", "Docker", "Terraform"
+]
 
-    "frameworks": [
-        "Spring Boot", "React", "Flask", "Node.js", "FastAPI"
-    ],
+def extract_skills(text: str) -> list[str]:
 
-    "databases": [
-        "PostgreSQL", "MySQL", "MongoDB"
-    ],
+    matches = []
 
-    "cloud": [
-        "AWS", "Microsoft Azure", "Docker", "Terraform"
-    ]
-}
+    for skill in SKILLS:
 
-def extract_skills(text: str) -> dict:
+        # re.escape(skill) protects special characters in skill names
+        pattern = r"(?<!\w)" + re.escape(skill) + r"(?!\w)"
 
-    extracted_skills = {}
+        if re.search(pattern, text, re.IGNORECASE):
+            matches.append(skill)
 
-    for category, skills in SKILL_CATEGORIES.items():
-
-        matches = []
-
-        for skill in skills:
-
-            # re.escape(skill) protects special characters in skill names
-            pattern = r"(?<!\w)" + re.escape(skill) + r"(?!\w)"
-
-            if re.search(pattern, text, re.IGNORECASE):
-                matches.append(skill)
-
-        extracted_skills[category] = matches
-
-    return extracted_skills
+    return matches

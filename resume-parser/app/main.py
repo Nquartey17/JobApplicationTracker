@@ -31,14 +31,12 @@ def parse_resume(file: UploadFile = File(...)):
 
         return {
             "filename": file.filename,
-            "extracted_text": text,
-            "skills": skills,
-            "education": education,
-            "experience": experience
+            "extracted_data": {
+                "skills": skills,
+                "education": education,
+                "experience": experience
+            }
         }
 
     except ValueError as e:
-        raise HTTPException(
-            status_code=400,
-            detail=str(e)
-        )
+        raise HTTPException( status_code=400, detail=str(e))
