@@ -1,5 +1,7 @@
 package com.quartey.jobapplicationtracker.service;
 
+import com.quartey.jobapplicationtracker.dto.ResumeParserResponse;
+import com.quartey.jobapplicationtracker.dto.ResumeUploadResponse;
 import org.springframework.core.io.Resource;
 import com.quartey.jobapplicationtracker.dto.ResumeResponse;
 import com.quartey.jobapplicationtracker.entity.Resume;
@@ -18,8 +20,7 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.server.ResponseStatusException;
+import com.quartey.jobapplicationtracker.dto.ResumeParserResponse;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -35,24 +36,26 @@ public class ResumeService {
     private final ResumeRepository resumeRepository;
     private final UserRepository userRepository;
     private final Path storageDirectory;
+    private final ResumeParserService resumeParserService;
 
 
     public ResumeService(ResumeRepository resumeRepository,
                          UserRepository userRepository,
                          @Value("${app.upload.resume-dir:uploads/resumes}") //Using Spring Value, not lombok
-                         String uploadDirectory) {
+                         String uploadDirectory, ResumeParserService resumeParserService) {
         this.resumeRepository = resumeRepository;
         this.userRepository = userRepository;
         this.storageDirectory = Paths.get(uploadDirectory)
                 .toAbsolutePath()
                 .normalize();
+        this.resumeParserService = resumeParserService;
     }
 
     @Transactional
-    public ResumeResponse uploadResume(String name,
-                                       Integer version,
-                                       MultipartFile file,
-                                       JwtAuthenticationToken authentication) {
+    public ResumeUploadResponse uploadResume(String name,
+                                             Integer version,
+                                             MultipartFile file,
+                                             JwtAuthenticationToken authentication) {
 
         String extension = getString(name, version, file);
 
@@ -64,6 +67,17 @@ public class ResumeService {
         }
 
         String username = authentication.getToken().getSubject();
+        ResumeParserResponse parsedData;
+
+        // Handle exception thrown by ResumeParserService. Converts an I/O failure into an HTTP 502 response,
+        // Indicating that Spring Boot couldn't successfully communicate with the parser.
+        try {
+            parsedData = resumeParserService.parseResume(file);
+        } catch (IOException e) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_GATEWAY,
+                    "Could not communicate with the resume parser", e);
+        }
 
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ResponseStatusException(
@@ -100,13 +114,16 @@ public class ResumeService {
 
         Resume savedResume = resumeRepository.save(resume);
 
-        return new ResumeResponse(
+        //
+        ResumeResponse resumeResponse = new ResumeResponse(
                 savedResume.getId(),
                 savedResume.getName(),
                 savedResume.getVersion(),
                 savedResume.getCreatedAt(),
                 savedResume.getUpdatedAt()
         );
+
+        return new ResumeUploadResponse(resumeResponse, parsedData);
     }
 
     private static boolean isValidContentType(MultipartFile file, String extension) {
@@ -196,6 +213,11 @@ public class ResumeService {
         Resume resume = resumeRepository.findById(id)
                 .orElseThrow(() ->
                         new ResponseStatusException(HttpStatus.NOT_FOUND, "Resume not found"));
+
+        if (!resume.getUser().getId().equals(user.getId())) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "Resume not found");
+        }
 
         try {
             //Retrieve the actual file

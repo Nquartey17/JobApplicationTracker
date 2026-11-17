@@ -1,6 +1,7 @@
 package com.quartey.jobapplicationtracker.controller;
 
 import com.quartey.jobapplicationtracker.dto.ResumeResponse;
+import com.quartey.jobapplicationtracker.dto.ResumeUploadResponse;
 import com.quartey.jobapplicationtracker.service.ResumeService;
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.core.io.Resource;
@@ -26,7 +27,7 @@ public class ResumeController {
 
     @PostMapping(consumes = "multipart/form-data")
     @ResponseStatus(HttpStatus.CREATED) // File successfully created
-    public ResumeResponse uploadResume(
+    public ResumeUploadResponse uploadResume(
             @RequestParam("name") @NotBlank
             String name,
 
