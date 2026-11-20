@@ -1,4 +1,4 @@
-from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi import FastAPI, UploadFile, File, HTTPException, Request
 
 from app.parser import extract_text
 from app.skill_extractor import extract_skills
@@ -20,6 +20,8 @@ def home():
 # File (...) tells FastAPI that this is a required parameter
 @app.post("/parse")
 def parse_resume(file: UploadFile = File(...)):
+    print("Filename:", file.filename)
+    print("Content type:", file.content_type)
 
     try:
         file_bytes = file.file.read()
@@ -40,3 +42,42 @@ def parse_resume(file: UploadFile = File(...)):
 
     except ValueError as e:
         raise HTTPException( status_code=400, detail=str(e))
+
+
+
+@app.post("/debug-multipart")
+async def debug_multipart(request: Request):
+
+    raw_body = await request.body()
+
+    print("DEBUG All request headers:", dict(request.headers))
+
+    print("DEBUG All request headers:",
+          dict(request.headers))
+
+    print("DEBUG Content-Type:",
+          request.headers.get("content-type"))
+
+    print("DEBUG Content-Length:",
+          request.headers.get("content-length"))
+
+    print("DEBUG Raw body size:",
+          len(raw_body))
+
+    print("DEBUG Raw body beginning:",
+          repr(raw_body[:300]))
+
+    form = await request.form()
+
+    print("DEBUG Received form fields:",
+          list(form.keys()))
+
+    uploaded_file = form.get("file")
+
+    print("DEBUG Filename:",
+          getattr(uploaded_file, "filename", None))
+
+    return {
+        "received_fields": list(form.keys()),
+        "filename": getattr(uploaded_file, "filename", None)
+    }

@@ -3,10 +3,14 @@ package com.quartey.jobapplicationtracker.service;
 import com.quartey.jobapplicationtracker.dto.ResumeParserResponse;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.MediaType;
-import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ContentDisposition;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 import java.io.IOException;
 
@@ -30,17 +34,34 @@ public class ResumeParserService {
                 }
             };
 
-        MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();
 
-        bodyBuilder.part("file", resource) // name MUST be "file" to match FastAPI endpoint
-                .contentType(MediaType.APPLICATION_OCTET_STREAM);
+        HttpHeaders fileHeaders = new HttpHeaders();
+
+        fileHeaders.setContentDisposition(
+                ContentDisposition.formData()
+                        .name("file")
+                        .filename(filename)
+                        .build()
+        );
+
+        fileHeaders.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+
+        HttpEntity<ByteArrayResource> filePart =
+                new HttpEntity<>(resource, fileHeaders);
+
+        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+        body.add("file", filePart);
+
 
         return resumeParserRestClient.post()
-                .uri("/parse") // Send file to /parse
+                .uri("/debug-multipart") // Send file to /parse
                 .contentType(MediaType.MULTIPART_FORM_DATA)
-                .body(bodyBuilder.build())
+                .body(body)
                 .retrieve()
                 .body(ResumeParserResponse.class);
+
+
+
 
     }
 }

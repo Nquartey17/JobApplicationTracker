@@ -59,6 +59,10 @@ public class ResumeService {
 
         String extension = getString(name, version, file);
 
+        System.out.println("Filename: " + file.getOriginalFilename());
+        System.out.println("Content Type: " + file.getContentType());
+        System.out.println("Extension: " + extension);
+
         boolean validContentType = isValidContentType(file, extension);
 
         if (!validContentType) {
