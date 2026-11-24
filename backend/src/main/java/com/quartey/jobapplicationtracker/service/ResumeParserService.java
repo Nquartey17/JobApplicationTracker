@@ -54,7 +54,7 @@ public class ResumeParserService {
 
 
         return resumeParserRestClient.post()
-                .uri("/debug-multipart") // Send file to /parse
+                .uri("/parse") // Send file to /parse
                 .contentType(MediaType.MULTIPART_FORM_DATA)
                 .body(body)
                 .retrieve()

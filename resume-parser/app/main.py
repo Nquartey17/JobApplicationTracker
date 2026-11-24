@@ -25,7 +25,6 @@ def parse_resume(file: UploadFile = File(...)):
 
     try:
         file_bytes = file.file.read()
-
         text = extract_text(file_bytes, file.filename)
         skills = extract_skills(text)
         education = extract_education(text)
@@ -44,40 +43,40 @@ def parse_resume(file: UploadFile = File(...)):
         raise HTTPException( status_code=400, detail=str(e))
 
 
-
-@app.post("/debug-multipart")
-async def debug_multipart(request: Request):
-
-    raw_body = await request.body()
-
-    print("DEBUG All request headers:", dict(request.headers))
-
-    print("DEBUG All request headers:",
-          dict(request.headers))
-
-    print("DEBUG Content-Type:",
-          request.headers.get("content-type"))
-
-    print("DEBUG Content-Length:",
-          request.headers.get("content-length"))
-
-    print("DEBUG Raw body size:",
-          len(raw_body))
-
-    print("DEBUG Raw body beginning:",
-          repr(raw_body[:300]))
-
-    form = await request.form()
-
-    print("DEBUG Received form fields:",
-          list(form.keys()))
-
-    uploaded_file = form.get("file")
-
-    print("DEBUG Filename:",
-          getattr(uploaded_file, "filename", None))
-
-    return {
-        "received_fields": list(form.keys()),
-        "filename": getattr(uploaded_file, "filename", None)
-    }
+# Uncomment in case of Python to Spring boot integration errors
+# @app.post("/debug-multipart")
+# async def debug_multipart(request: Request):
+#
+#     raw_body = await request.body()
+#
+#     print("DEBUG All request headers:", dict(request.headers))
+#
+#     print("DEBUG All request headers:",
+#           dict(request.headers))
+#
+#     print("DEBUG Content-Type:",
+#           request.headers.get("content-type"))
+#
+#     print("DEBUG Content-Length:",
+#           request.headers.get("content-length"))
+#
+#     print("DEBUG Raw body size:",
+#           len(raw_body))
+#
+#     print("DEBUG Raw body beginning:",
+#           repr(raw_body[:300]))
+#
+#     form = await request.form()
+#
+#     print("DEBUG Received form fields:",
+#           list(form.keys()))
+#
+#     uploaded_file = form.get("file")
+#
+#     print("DEBUG Filename:",
+#           getattr(uploaded_file, "filename", None))
+#
+#     return {
+#         "received_fields": list(form.keys()),
+#         "filename": getattr(uploaded_file, "filename", None)
+#     }
